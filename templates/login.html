@@ -1,0 +1,88 @@
+{{ define "login" }}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home page</title>
+
+  <link href="/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <link rel="stylesheet" href="/css/assets/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+  <!-- <div class="main">
+        <div class="container">
+            <center>
+                <div class="middle">
+                    <div id="login">
+                        <form action="javascript:void(0);" method="get">
+                            <fieldset class="clearfix">
+                                <p>
+                                    <span class="fa fa-user"></span>
+                                    <input type="text" Placeholder="Username" required>
+                                </p>
+                                <p>
+                                    <span class="fa fa-lock"></span>
+                                    <input type="password" Placeholder="Password" required>
+                                </p>
+                                <div>
+                                    <span style="width:48%; text-align:left;  display: inline-block;">
+                                        <a class="small-text" href="#">Забыли пароль?</a>
+                                    </span>
+                                    <span style="width:50%; text-align:right;  display: inline-block;">
+                                        <a href="/">Вход</a>
+                                    </span>
+                                </div>
+                            </fieldset>
+                            <div class="clearfix"></div>
+                        </form>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="logo">
+                        <img src="/img/logo.png" alt="logo" class="logo">
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </center>
+        </div>
+    </div> -->
+  <div class="wrapper-form text-center">
+    <form class="form-signin needs-validation signin" novalidate="">
+      <img class="mb-4" src="/img/logo.png" alt="" width="300" height="50">
+
+      <div class="alert alert-danger hidden" role="alert"></div>
+
+      <label for="inputEmail" class="sr-only">Email</label>
+      <input type="email" id="inputEmail" class="form-control" placeholder="Email" name="email" required=""
+        autofocus="">
+      <label for="inputPassword" class="sr-only">Пароль</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Пароль" name="password" required="">
+      <button class="btn btn-lg btn-primary btn-block" data-url="login" type="submit">Войти</button>
+      <p class="mt-5 mb-3 text-muted">© 2020-2020</p>
+    </form>
+
+    <form class="form-signin needs-validation verify hidden" novalidate="">
+      <img class="mb-4" src="/img/logo.png" alt="" width="300" height="50">
+
+      <div class="alert alert-danger hidden" role="alert"></div>
+
+      <label for="sms" class="sr-only">Введите смс код</label>
+      <input type="text" id="sms" class="form-control" placeholder="Код из смс" name="sms" required="" autofocus="">
+      <button class="btn btn-lg btn-primary btn-block" data-url="verify" type="submit">Подтвердить</button>
+      <p class="mt-5 mb-3 text-muted">© 2020-2020</p>
+    </form>
+  </div>
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/main.js"></script>
+
+</body>
+
+</html>
+{{ end }}

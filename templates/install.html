@@ -1,0 +1,170 @@
+{{ define "install" }}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Install Application</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="/css/wizard1.css">
+
+</head>
+
+<body>
+
+  <div class="container">
+    <center>
+      <img class="mb-4" src="/img/logo.png" alt="" height="60">
+    </center>
+    <div class="wizard-wrapper center-block">
+      <div class="stepwizard">
+        <div class="stepwizard-row setup-panel">
+          <div class="stepwizard-step">
+            <a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
+            <p>Шаг 1</p>
+          </div>
+          <div class="stepwizard-step">
+            <a href="#step-2" type="button" class="btn btn-default btn-circle" disabled="disabled">2</a>
+            <p>Шаг 2</p>
+          </div>
+          <div class="stepwizard-step">
+            <a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">3</a>
+            <p>Шаг 3</p>
+          </div>
+        </div>
+      </div>
+
+      <form role="form">
+
+        <div class="row setup-content" id="step-1">
+          <div class="col-md-12">
+            <h3>Основная информация</h3>
+            <div class="form-group">
+              <label class="col-form-label">Название приложения</label>
+              <input type="text" class="form-control " required placeholder="Название приложения" />
+            </div>
+            <div class="form-group">
+              <label class="col-form-label">Логотип</label>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="customFile">
+                <label class="custom-file-label" for="customFile">Загрузить логотип</label>
+              </div>
+            </div>
+            <button class="btn btn-primary nextBtn float-right" type="button">Далее</button>
+          </div>
+        </div>
+
+        <div class="row setup-content" id="step-2">
+          <div class="col-12">
+            <h3>База данных</h3>
+
+            <div class="form-row">
+              <div class="col-12">
+                <div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="database_driver" id="sqlite3" value="sqlite3" autocomplete="off">
+                    Sqlite3
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="database_driver" id="postgres" value="postgres" autocomplete="off">
+                    PostgreSQL
+                  </label>
+                  <label class="btn btn-outline-secondary">
+                    <input type="radio" name="database_driver" id="mysql" value="mysql" autocomplete="off">
+                    MySQL
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="bd_server">
+              <div class="form-row">
+                <div class="col-8">
+                  <div class="form-group">
+                    <label class="col-form-label">Адрес</label>
+                    <input type="text" class="form-control" placeholder="Адрес" />
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="col-form-label">Порт</label>
+                    <input type="text" class="form-control" placeholder="Порт" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label class="col-form-label">Имя пользователя</label>
+                    <input type="text" class="form-control" placeholder="Имя пользователя" />
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group">
+                    <label class="col-form-label">Пароль</label>
+                    <input type="text" class="form-control" placeholder="Пароль" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-row bd_path" style="display: none;">
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="col-form-label">Имя файловой базы</label>
+                  <input type="text" class="form-control" placeholder="./databaseName.db" />
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary backBtn float-left" type="button">Назад</button>
+            <button class="btn btn-primary nextBtn float-right" type="button">Далее</button>
+          </div>
+        </div>
+
+        <div class="row setup-content" id="step-3">
+          <div class="col-12">
+            <h3>Администратор</h3>
+            <div class="form-row">
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="col-form-label">Имя пользователя</label>
+                  <input type="text" class="form-control" placeholder="Имя пользователя" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="col-form-label">Пароль</label>
+                  <input type="password" class="form-control" placeholder="Пароль" />
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary backBtn float-left" type="button">Назад</button>
+            <button class="btn btn-success float-right" type="submit">Сохранить</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+  </script>
+
+  <script src="/js/wizrd1.js"></script>
+
+</body>
+
+</html>
+{{ end }}

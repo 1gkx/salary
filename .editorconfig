@@ -1,0 +1,22 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*.go]
+indent_style = tab # official recommended
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# HTML-Files LESS-Files SASS-Files CSS-Files JS-Files JSON-Files
+[{*.html,*.less,*.sass,*.css,*.js,*.json}]
+indent_style = space
+indent_size = 2
+
+# Gitlab-CI, Travis-CI
+[*.yml]
+indent_style = space
+indent_size = 2

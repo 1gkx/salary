@@ -1,0 +1,240 @@
+{{ define "settings" }}
+
+{{template "header" .}}
+{{template "navbar" .}}
+
+<div class="container text-center main">
+  <div class="row" style="margin: 30px 0;">
+
+    <div class="col-12 bhoechie-tab-container">
+      <div class="row">
+        <div class="col-2 bhoechie-tab-menu">
+          <div class="list-group">
+            <a href="/admin/settings" class="list-group-item active text-center">
+              <i class="fas fa-cogs"></i><br />Настройки
+            </a>
+            <a href="/admin/users" class="list-group-item text-center">
+              <i class="fas fa-users"></i><br />Пользователи
+            </a>
+          </div>
+        </div>
+        <div class="col-9 bhoechie-tab">
+          <div class="bhoechie-tab-content active">
+            <center>
+              <div class="container">
+                <div class="row">
+                  <div class="col-12">
+                    <h4 class="mb-3">Настройки</h4>
+                    <form class="needs-validation" novalidate="">
+                      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-outline-secondary active">
+                          <input type="radio" name="database_driver" id="sqlite3" value="sqlite3" autocomplete="off"
+                            {{if (eq .data.Database.Driver "sqlite3")}}checked{{end}}>
+                          Sqlite3
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                          <input type="radio" name="database_driver" id="postgres" value="postgres" autocomplete="off"
+                            {{if (eq .data.Database.Driver "postgres")}}checked{{end}}>
+                          PostgreSQL
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                          <input type="radio" name="database_driver" id="mysql" value="mysql" autocomplete="off"
+                            {{if (eq .data.Database.Driver "mysql")}}checked{{end}}>
+                          MySQL
+                        </label>
+                      </div>
+
+                      <fieldset
+                        class="row database_path {{if not (eq .data.Database.Driver "sqlite3")}} hidden {{ end }}">
+                        <label for="database_path">Путь к файлу базы данных</label>
+                        <input type="text" class="form-control" id="database_path" name="database_path" placeholder=""
+                          value="{{ .data.Database.Path }}" required="">
+                      </fieldset>
+
+                      <fieldset class="database_server {{ if (eq .data.Database.Driver "sqlite3") }} hidden {{ end }}">
+                        <div class="row">
+                          <div class="col-8">
+                            <label for="database_server">Сервер</label>
+                            <input type="text" class="form-control" name="database_server" id="database_server" placeholder=""
+                              value="{{ .data.Database.Host }}" required="">
+                            <div class="invalid-feedback">Это поле обязательно!</div>
+                          </div>
+                          <div class="col-4">
+                            <label for="database_port">Порт</label>
+                            <input type="text" class="form-control" name="database_port" id="database_port" placeholder=""
+                              value="{{ .data.Database.Port }}" required="">
+                            <div class="invalid-feedback">Это поле обязательно!</div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-6">
+                            <label for="database_user">Логин</label>
+                            <div class="input-group">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text">@</span>
+                              </div>
+                              <input type="text" class="form-control" name="database_user" id="database_user" placeholder=""
+                                value="{{ .data.Database.User }}" required="">
+                              <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <label for="database_pass">Пароль</label>
+                            <div class="input-group">
+                              <input type="password" class="form-control" name="database_pass" id="database_pass"
+                                placeholder="" required="">
+                              <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                            </div>
+                          </div>
+                        </div>
+                      </fieldset>
+
+                      <hr class="mb-4">
+
+                      <div class="row">
+                        <div class="col-12">
+                          <label for="gateway">Адрес шлюза</label>
+                          <div class="input-group">
+                            <input type="text" class="form-control" name="gateway" id="gateway"
+                              placeholder="http://example.com:8080" value="{{ .data.Gateway }}" required="">
+                            <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr class="mb-4">
+
+                      <div class="row">
+                        <div class="col-6">
+                          <label for="mailHost">Адрес почтового сервера</label>
+                          <div class="input-group">
+                            <input type="text" class="form-control" name="mail_host" id="mailHost" placeholder=""
+                              value="{{ .data.Mail.Host }}" required="">
+                            <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <label for="mailPort">Пароль</label>
+                          <div class="input-group">
+                            <input type="text" class="form-control" name="mail_port" id="mailPort" placeholder=""
+                              value="{{ .data.Mail.Port }}" required="">
+                            <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr class="mb-4">
+
+                      <div class="row">
+                        <div class="col-12">
+                          <label for="time">Время очистки базы</label>
+                          <div class="input-group">
+                            <input type="time" class="form-control" name="time" id="time" value="00:00" required="">
+                            <div class="invalid-feedback" style="width: 100%;">is required.</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr class="mb-4">
+
+                      <!-- <button class="btn btn-primary btn-lg float-right" type="submit">Сохранить</button> -->
+                      <a class="btn btn-primary btn-lg float-right">Сохранить</a>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-outline-secondary").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        if (e.target.firstElementChild.id == "sqlite3") {
+          document.querySelector(".database_path").classList.remove("hidden")
+          document.querySelector(".database_path").disable = false
+          document.querySelector(".database_server").classList.add("hidden")
+          document.querySelector(".database_server").disable = true
+        } else {
+          document.querySelector(".database_path").classList.add("hidden")
+          document.querySelector(".database_path").disable = true
+          document.querySelector(".database_server").classList.remove("hidden")
+          document.querySelector(".database_server").disable = false
+        }
+      })
+    })
+
+    document.querySelector(".btn-primary").addEventListener("click", function (e) {
+      e.preventDefault()
+
+      let $form = document.querySelector('.needs-validation');
+      // if ($form.checkValidity() === false) return $form.classList.add('was-validated');
+
+      let data = new FormData($form)
+      // let map = [];
+      // data.forEach((value, key) => {
+      //   let k = key.split("_")
+      //   if (k.length > 1) {
+      //     if (!map[k[0]]) map[k[0]] = []
+      //     map[k[0]][k[1]] = value
+      //   } else {
+      //     map[key] = value
+      //   }
+      // })
+
+      let map = {};
+      data.forEach((value, key) => {
+        let k = key.split("_")
+        if (k.length > 1) {
+          if (!map[k[0]]) map[k[0]] = {}
+          map[k[0]][k[1]] = value
+        } else {
+          map[key] = value
+        }
+      })
+
+      console.log(JSON.stringify(map))
+      post(map)
+    })
+  })
+  async function post(data) {
+    let response = await fetch('/admin/settings', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    let result = await response.json()
+    console.log(result)
+    createAlert(result.message)
+  }
+
+  function createAlert(text) {
+    if (!document.querySelector('.messages')) {
+      let msg = document.createElement('div')
+      msg.classList.add('messages')
+      console.log(msg)
+      document.body.appendChild(msg)
+    }
+    // получаем контейнер
+    const messages = document.querySelector('.messages');
+
+    const message = document.createElement('div');
+    message.className = 'alert alert-success alert-dismissible fade show';
+    message.innerHTML = `
+            <h4 class="alert-heading">Success!</h4>
+            <p>${text}!.</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        `;
+    messages.appendChild(message);
+  }
+
+</script>
+
+{{template "footer" .}}
+
+{{ end }}

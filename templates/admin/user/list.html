@@ -1,0 +1,90 @@
+{{ define "list" }}
+
+{{template "header" .}}
+{{template "navbar" .}}
+
+<div class="container text-center main">
+  <div class="row" style="margin: 30px 0;">
+
+    <div class="col-12 bhoechie-tab-container">
+      <div class="row">
+        <div class="col-2 bhoechie-tab-menu">
+          <div class="list-group">
+            <a href="/admin/settings" class="list-group-item text-center">
+              <i class="fas fa-cogs"></i><br />Настройки
+            </a>
+            <a href="/admin/users" class="list-group-item active text-center">
+              <i class="fas fa-users"></i><br />Пользователи
+            </a>
+          </div>
+        </div>
+        <div class="col-9 bhoechie-tab">
+          <div class="bhoechie-tab-content active">
+            <a href="/admin/users/new" class="btn btn-primary float-right" style="margin: 10px 0;">Новый
+              пользователь</a>
+            <center>
+              <table class="table table-striped table-hover table-list-search">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Пользователь</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Администратор</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .data}}
+                  <tr class="item" data-id="{{ .ID }}">
+                    <td>{{ .ID }}</td>
+                    <td><a href="/admin/users/{{ .ID }}">{{ .FirstName }} {{ .LastName }}</a></td>
+                    <td>{{ .Email }}</td>
+                    <td>{{ .Phone }}</td>
+                    <td>{{ .Admin }}</td>
+                    <td><a href="#" class="btn btn-danger" title="Удалить"><span aria-hidden="true">&times;</span></a>
+                    </td>
+                  </tr>
+                  {{end}}
+                </tbody>
+              </table>
+
+              {{ block "paggination" .}}{{ end }}
+
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+    let btn_deleted = document.querySelectorAll(".btn-danger");
+
+    btn_deleted.forEach((btn) => {
+      btn.addEventListener('click', function (e) {
+        let el = e.target.closest('.item');
+        if (el && el.dataset.id) {
+
+        }
+      });
+    });
+
+  })();
+  async function post(id) {
+    let response = await fetch('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(Data)
+    });
+
+    let result = await response;
+    console.log(result);
+  }
+</script>
+
+{{template "footer" .}}
+
+{{ end }}
