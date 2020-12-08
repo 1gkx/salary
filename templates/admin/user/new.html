@@ -3,115 +3,81 @@
 {{template "header" .}}
 {{template "navbar" .}}
 
-<div class="container text-center main">
-    <div class="row" style="margin: 30px 0;">
-
-        <div class="col-12 bhoechie-tab-container">
-            <div class="row">
-                <div class="col-2 bhoechie-tab-menu">
-                    <div class="list-group">
-                        <a href="/admin/settings" class="list-group-item text-center">
-                            <i class="fas fa-cogs"></i><br />Настройки
-                        </a>
-                        <a href="/admin/users" class="list-group-item active text-center">
-                            <i class="fas fa-users"></i><br />Пользователи
-                        </a>
-                    </div>
-                </div>
-                <div class="col-9 bhoechie-tab">
-                    <!-- flight section -->
-                    <div class="bhoechie-tab-content active">
-                        <center>
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <h4 class="mb-3">Новый пользователь</h4>
-                                        <form class="needs-validation" novalidate="">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="firstname">Имя</label>
-                                                    <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Иван" value="" required="true">
-                                                    <div class="invalid-feedback">Это поле обязательно!</div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="lastname">Фамилия</label>
-                                                    <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Иванов" value="" required="true">
-                                                    <div class="invalid-feedback">Это поле обязательно!</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <label for="email">Email</label>
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control" id="email" name="email" placeholder="example" required="">
-                                                        <div class="invalid-feedback" style="width: 100%;">Это поле обязательно!<</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="phone">Телефон</label>
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control" id="phone" name="phone" placeholder="+7 (___) ___-__-__" required="">
-                                                        <div class="invalid-feedback" style="width: 100%;">Это поле обязательно!<</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <hr class="mb-4">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" value="true" id="admin" name="admin">
-                                                <label class="custom-control-label" for="admin" >Администратор системы</label>
-                                            </div>
-
-                                            <hr class="mb-4">
-                                            <a class="btn btn-primary btn-lg btn-block">Сохранить</a>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </center>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container text-center main mt-5">
+  <div class="row">
+    <div class="col-2">
+      <div class="list-group">
+        <a href="/admin/settings" class="list-group-item text-center">
+          <i class="fas fa-cogs"></i><br />Настройки
+        </a>
+        <a href="/admin/users" class="list-group-item active text-center">
+          <i class="fas fa-users"></i><br />Пользователи
+        </a>
+      </div>
     </div>
+    <div class="col-9">
+      <div class="container">
+        <h4 class="mb-3">Новый пользователь</h4>
+        <form action="/admin/users" class="needs-validation adduser" novalidate="">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="firstname">Имя</label>
+              <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Иван" value=""
+                required="true">
+              <div class="invalid-feedback w-100">Это поле обязательно!</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="lastname">Фамилия</label>
+              <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Иванов" value=""
+                required="true">
+              <div class="invalid-feedback w-100">Это поле обязательно!</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <label for="email">Email</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="email" name="email" placeholder="example@mail.com"
+                  required="">
+                <div class="invalid-feedback w-100">
+                  Это поле
+                  обязательно!</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <label for="phone">Телефон</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="+7(___)___-__-__"
+                  required="">
+                <div class="invalid-feedback w-100">Это поле обязательно!</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <label for="password">Пароль</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Пароль"
+                  required="">
+                <div class="invalid-feedback w-100">
+                  Это поле
+                  обязательно!</div>
+              </div>
+            </div>
+          </div>
+          <hr class="mb-4">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" value="true" id="admin" name="admin">
+            <label class="custom-control-label" for="admin">Администратор
+              системы</label>
+          </div>
+          <hr class="mb-4">
+          <button class="btn btn-lg btn-primary float-right" data-adduser type="submit">Сохранить</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
-
-<script>
-(function() {
-    'use strict';
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector(".btn").addEventListener('click', function (event) {
-            // Отменаяем действия по умолчанию
-            event.preventDefault();
-            var form = document.querySelector('.needs-validation');
-            // let form = document.forms.newuser;
-
-            // Валидация
-            if (form.checkValidity() === false) return form.classList.add('was-validated');
-
-            post(form);
-        });
-    });
-})();
-
-async function post(form) {
-
-    let formData = new FormData(form),
-        Data = {};
-    for(let item of formData.entries()) {
-        Data[item[0]] = item[1];
-    }
-
-    let response = await fetch('/admin/users', {
-        method: 'POST',
-        body: JSON.stringify(Data)
-    });
-
-    let result = await response;
-    console.log(result);
-}
-</script>
 
 {{template "footer" .}}
 

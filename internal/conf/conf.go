@@ -14,12 +14,14 @@ type database struct {
 }
 
 type mail struct {
-	Host string `json:"host";ini:"host"`
-	Port string `json:"port";ini:"port"`
+	Host     string `json:"host";ini:"host"`
+	Port     string `json:"port";ini:"port"`
+	Login    string `json:"login";ini:"login"`
+	Password string `json:"password";ini:"password"`
 }
 
 type Config struct {
-	Prod bool `json:"prod";ini:"prod"`
+	Prod     bool              `json:"prod";ini:"prod"`
 	Database database          `json:"database";ini:"database"`
 	Mail     mail              `json:"mail";ini:"mail"`
 	Gateway  string            `json:"gateway";ini:"gateway"`

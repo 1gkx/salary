@@ -127,7 +127,8 @@ func Add(r *http.Request, w http.ResponseWriter, val map[string]interface{}) err
 // CheckAuth Проверка логина и пароля
 func CheckAuth(r *http.Request) bool {
 
-	if u, err := store.FindByEmail2(r.FormValue("email")); err == nil {
+	u, err := store.FindByEmail2(r.FormValue("email"))
+	if err == nil {
 		return u.ComparePass(r.FormValue("password"))
 	}
 

@@ -1,5 +1,5 @@
 {{ define "navbar" }}
-<nav class="navbar navbar-expand-md flex-nowrap navbar-light">
+<nav class="navbar navbar-expand-md navbar-light">
   <div class="container">
     <a class="navbar-brand" href="/">
       <img src="/img/logo.png" alt="Примсоцбанк" style="height: 40px;" />
@@ -18,9 +18,7 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right animate slideIn" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="/user">Профиль</a>
-            {{ if .user.Admin }}
             <a class="dropdown-item" href="/admin/settings">Настройки</a>
-            {{ end }}
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/logout">Выход</a>
           </div>

@@ -7,7 +7,6 @@ import (
 	log "unknwon.dev/clog/v2"
 
 	"github.com/1gkx/salary/internal/cmd"
-	// "github.com/1gkx/salary/internal/conf"
 )
 
 // func init() {
@@ -23,13 +22,6 @@ func main() {
 	app.Commands = []cli.Command{
 		cmd.Start,
 		cmd.Install,
-		// cmd.Serv,
-		// cmd.Hook,
-		// cmd.Cert,
-		// cmd.Admin,
-		// cmd.Import,
-		// cmd.Backup,
-		// cmd.Restore,
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal("Failed to start application: %v", err)

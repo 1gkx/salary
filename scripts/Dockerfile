@@ -8,7 +8,7 @@ RUN apk add --no-cache --virtual .build-deps --update gcc musl-dev git make\
 # Create prodaction application container
 FROM alpine:latest as production
 WORKDIR /usr/app
-COPY --from=backend /build/src/salary ./salary
+COPY --from=backend /build/src/build/salary ./salary
 COPY --from=backend /build/src/conf ./conf
 COPY --from=backend /build/src/data ./data
 COPY --from=backend /build/src/public ./public

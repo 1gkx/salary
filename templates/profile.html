@@ -2,68 +2,43 @@
 
 {{ block "header" .}}{{ end }}
 {{ block "navbar" .}}{{ end }}
-<div class="container text-center main">
-  <div class="col-12">
-    <div class="container">
-      <div class="profile">
-        <div class="Back">
-          <i class="fa fa-arrow-left" onclick="Back()"></i>
-        </div>
-        <p class="h2 text-center">{{ .user.FirstName }} {{ .user.LastName }}</p>
-        <form action="" method="post">
-          <div class="preview text-center">
-            <img class="preview-img" src="/img/account.png" alt="Preview Image" width="150" height="150" />
-            <div class="browse-button">
-              <i class="fa fa-pencil-alt"></i>
-              <input class="browse-input" type="file" required name="UploadedFile" id="UploadedFile" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Фамилия</label>
-            <input class="form-control" type="text" name="" required placeholder="Фамилия"
-              value="{{ .user.LastName }}" />
-          </div>
-          <div class="form-group">
-            <label>Имя</label>
-            <input class="form-control" type="text" name="" required placeholder="Имя" value="{{ .user.FirstName }}" />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input class="form-control" type="email" name="email" required placeholder="Введите ваш Email"
-              value="{{ .user.Email }}" />
-          </div>
-          <div class="form-group">
-            <label>Телефон</label>
-            <input class="form-control phone" type="text" name="email" required placeholder="Введите ваш номер телефона"
-              value="{{ .user.Phone }}" />
-          </div>
-          <div class="form-group">
-            <label>Действующий пароль</label>
-            <input class="form-control" type="password" name="password" placeholder="Действующий пароль" />
-          </div>
-          <div class="form-group">
-            <label>Новый пароль</label>
-            <input class="form-control" type="password" name="newpassword" placeholder="Новый пароль" />
-          </div>
-          <div class="form-group">
-            <input class="btn btn-primary btn-block" type="submit" value="Submit" />
-          </div>
-        </form>
-      </div>
-    </div>
 
+<div class="mt-5 container text-center main">
+  <div class="profile">
+    <p class="h2 text-center my-5">{{ .user.FirstName }} {{ .user.LastName }}</p>
+    <form action="" method="post">
+      <div class="form-group">
+        <label>Фамилия</label>
+        <input class="form-control" type="text" name="" required placeholder="Фамилия" value="{{ .user.LastName }}" />
+      </div>
+      <div class="form-group">
+        <label>Имя</label>
+        <input class="form-control" type="text" name="" required placeholder="Имя" value="{{ .user.FirstName }}" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input class="form-control" type="email" name="email" required placeholder="Введите ваш Email" value="{{ .user.Email }}" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Телефон</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="phone" name="phone" placeholder="+7(___)___-__-__" value="{{ .user.Phone }}" required="">
+            <div class="invalid-feedback w-100">Это поле обязательно!</div>
+          </div>
+      </div>
+      <div class="form-group">
+        <label>Действующий пароль</label>
+        <input class="form-control" type="password" name="password" placeholder="Действующий пароль" />
+      </div>
+      <div class="form-group">
+        <label>Новый пароль</label>
+        <input class="form-control" type="password" name="newpassword" placeholder="Новый пароль" />
+      </div>
+      <div class="form-group">
+        <input class="btn btn-primary btn-block" type="submit" value="Обновить" />
+      </div>
+    </form>
   </div>
 </div>
 {{template "footer" .}}
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    let phone = document.querySelector('.phone')
-    phone.addEventListener('blur', function (e) {
-      var x = e.target.value.replace(/^\D/g, '').match(/^(7) (\d{3}) (\d{3})-(\d{2})-(\d{2})/)
-      e.target.value = '+7 (' + x[2] + ') ' + x[3] + '-' + x[4] + '-' + x[5]
-    });
-  })
-</script>
-
 {{ end }}
