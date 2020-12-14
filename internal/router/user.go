@@ -59,18 +59,15 @@ func userNew(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func userAdd(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-	fmt.Printf("Request: %+v\n", r)
-	// u := new(store.User)
-	// _ = json.NewDecoder(r.Body).Decode(&u)
-	// fmt.Printf("User: %+v\n", u)
+	u := new(store.User)
+	_ = json.NewDecoder(r.Body).Decode(&u)
+	fmt.Printf("User: %+v\n", u)
 
-	// fmt.Printf("User update: %+v\n", u.user)
-
-	// if err := store.AddUser(u.user); err != nil {
-	// 	w.WriteHeader(501)
-	// 	json.NewEncoder(w).Encode(err.Error())
-	// 	return
-	// }
+	if err := store.AddUser(u); err != nil {
+		w.WriteHeader(501)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 	w.WriteHeader(201)
 	return
 }
@@ -99,7 +96,7 @@ func userUpdate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		return
 	}
 
-	if u.ComparePass(tmpUser.NewPassword) {
+	if u.ComparePass(tmpUser.Password) {
 		if password, err := bcrypt.GenerateFromPassword([]byte(tmpUser.NewPassword), 0); err == nil {
 			u.Password = string(password)
 		}
@@ -113,14 +110,14 @@ func userUpdate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	}
 
 	fmt.Printf("{\"status\": \"%+v\"}", u)
-	// if err := store.UpdateUser(u); err != nil {
-	// 	w.WriteHeader(501)
-	// 	fmt.Printf("{\"status\": \"%s\"}", err.Error())
-	// 	json.NewEncoder(w).Encode(
-	// 		fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
-	// 	)
-	// 	return
-	// }
+	if err := store.UpdateUser(u); err != nil {
+		w.WriteHeader(501)
+		fmt.Printf("{\"status\": \"%s\"}", err.Error())
+		json.NewEncoder(w).Encode(
+			fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
+		)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
