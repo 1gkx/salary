@@ -9,6 +9,7 @@ import (
 	"github.com/1gkx/salary/internal/store"
 	templates "github.com/1gkx/salary/internal/template"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func setUserRouters() {
@@ -58,7 +59,7 @@ func userNew(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func userAdd(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-	// fmt.Printf("Request: %+v\n", r)
+	fmt.Printf("Request: %+v\n", r)
 	// u := new(store.User)
 	// _ = json.NewDecoder(r.Body).Decode(&u)
 	// fmt.Printf("User: %+v\n", u)
@@ -70,14 +71,14 @@ func userAdd(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// 	json.NewEncoder(w).Encode(err.Error())
 	// 	return
 	// }
-	// w.WriteHeader(201)
+	w.WriteHeader(201)
 	return
 }
 
 func userUpdate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
-	u := new(store.User)
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+	tmpUser := new(store.User)
+	if err := json.NewDecoder(r.Body).Decode(&tmpUser); err != nil {
 		w.WriteHeader(501)
 		fmt.Printf("{\"status\": \"%s\"}", err.Error())
 		json.NewEncoder(w).Encode(
@@ -86,12 +87,32 @@ func userUpdate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		return
 	}
 
+	fmt.Printf("{\"status\": \"%+v\"}", tmpUser)
+
+	u, err := store.FindByEmail(tmpUser.Email)
+	if err != nil {
+		w.WriteHeader(501)
+		fmt.Printf("{\"status\": \"%s\"}", err.Error())
+		json.NewEncoder(w).Encode(
+			fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
+		)
+		return
+	}
+
+	if u.ComparePass(tmpUser.NewPassword) {
+		if password, err := bcrypt.GenerateFromPassword([]byte(tmpUser.NewPassword), 0); err == nil {
+			u.Password = string(password)
+		}
+	} else {
+		w.WriteHeader(501)
+		fmt.Printf("{\"status\": \"Password not compare\"}")
+		json.NewEncoder(w).Encode(
+			fmt.Sprintf("{\"status\": \"Password not compare\"}"),
+		)
+		return
+	}
+
 	fmt.Printf("{\"status\": \"%+v\"}", u)
-
-	// if u.user.ComparePass(u.newpass) {
-	// 	u.user.Password = u.newpass
-	// }
-
 	// if err := store.UpdateUser(u); err != nil {
 	// 	w.WriteHeader(501)
 	// 	fmt.Printf("{\"status\": \"%s\"}", err.Error())
