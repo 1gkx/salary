@@ -23,13 +23,10 @@ type Responce struct {
 func Post(data interface{}, method string) (*Responce, error) {
 
 	if !conf.Prod() {
-		var d = []byte(`{"data":[{"code":"1234"}],"error":"","extra":"СМС успешно отправлено","result":"1"}`)
-		res123 := new(Responce)
-		json.Unmarshal(d, &res123)
-		return res123, nil
+		return returnTestCode()
 	}
 
-	jdata, err := json.Marshal(data)
+	jdata, _ := json.Marshal(data)
 	req, err := http.NewRequest(
 		"POST",
 		conf.Cfg.Gateway,
@@ -65,4 +62,11 @@ func (res *Responce) GetSmsCode() string {
 
 func (res *Responce) GetExpiredSmsCode() string {
 	return time.Now().Add(1 * time.Minute).Format(time.RFC3339)
+}
+
+func returnTestCode() (*Responce, error) {
+	var d = []byte(`{"data":[{"code":"1234"}],"error":"","extra":"СМС успешно отправлено","result":"1"}`)
+	res123 := new(Responce)
+	json.Unmarshal(d, &res123)
+	return res123, nil
 }

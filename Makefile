@@ -21,7 +21,7 @@ build:
 
 .PHONY: buildprod
 buildprod:
-	env GOOS=linux GOARCH=amd64 go build -o  $(OUTPUT_FILE)  -v ./main.go
+	env GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o $(OUTPUT_FILE)  -v ./main.go
 
 .PHONY: run
 run:

@@ -53,7 +53,7 @@ func GetUser(r *http.Request) *store.User {
 	c, _ := S.Get(r, cookieName)
 	email, _ := c.Values["user"].(string)
 
-	if u, err := store.FindByEmail2(email); err == nil {
+	if u, err := store.FindByEmail(email); err == nil {
 		return u
 	}
 	return nil
@@ -126,13 +126,16 @@ func Add(r *http.Request, w http.ResponseWriter, val map[string]interface{}) err
 
 // CheckAuth Проверка логина и пароля
 func CheckAuth(r *http.Request) bool {
-
-	u, err := store.FindByEmail2(r.FormValue("email"))
-	if err == nil {
-		return u.ComparePass(r.FormValue("password"))
+	var (
+		u   *store.User
+		err error
+	)
+	if u, err = store.FindByEmail(r.FormValue("email")); err != nil {
+		fmt.Printf("auth failed: %s\n", err.Error())
+		return false
 	}
 
-	return false
+	return u.ComparePass(r.FormValue("password"))
 }
 
 func CheckSms(r *http.Request) bool {

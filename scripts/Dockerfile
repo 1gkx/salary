@@ -6,7 +6,8 @@ RUN apk add --no-cache --virtual .build-deps --update gcc musl-dev git make\
     && export GOSUMDB=off &&  go mod download && make buildprod
 
 # Create prodaction application container
-FROM alpine:latest as production
+FROM scratch as production
+#FROM alpine:latest as production
 WORKDIR /usr/app
 COPY --from=backend /build/src/build/salary ./salary
 COPY --from=backend /build/src/conf ./conf

@@ -35,13 +35,13 @@
     },
     auth(responce) {
       // form = this
-      if (response.code > 400) {
-        return $(this).fail(response.data.message)
+      if (responce.code > 400) {
+        return $(this).fail(responce.data.message)
       }
       // Смс верификация прошла успешно
-      if (response.code == 200 && response.data.verify) return document.location.href = '/'
+      if (responce.code == 200 && responce.data.verify) return document.location.href = '/'
 
-      if (response.code == 200 && response.data.auth) {
+      if (responce.code == 200 && responce.data.auth) {
         this.addClass('d-none')
         $('.verify').removeClass('d-none')
       }
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
   })
 
   // Переключатели типа базы данных
-  $('input[type=radio]').on('change', function (e) {
+  $('input[type=radio]').on('change', function(e) {
     if (this.value == "sqlite3") {
       $('.database_server').addClass('d-none')
       $('.database_path').removeClass('d-none')
@@ -74,35 +74,78 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Авторизация и верификация
+  $(".login").submit(function(e) {
+    let self = this;
+    e.preventDefault();
+    if (this.checkValidity() === false) return this.classList.add('was-validated');
+    $.post(this.action, $(this).serializeArray())
+    .done(function(res) {
+      let responce = JSON.parse(res)
+      $(self).auth(responce)
+    })
+    .fail(function(e) {
+      let error = JSON.parse(e.responseText)
+      $(self).fail(error.data.message)
+    });
+  });
+
   // Сохранение данных пользователя
-  $(".adduser").submit(function (event) {
-    event.preventDefault();
+  $(".adduser").submit(function(e) {
+    e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
     $.post(this.action, JSON.stringify($(this).serializeArray()))
       .done(responce => $().message(true, responce))
       .fail(error => $().message(false, error));
   });
 
-  // Авторизация и верификация
-  $(".login").submit(function (event) {
-    let self = this;
-    event.preventDefault();
+  // Сохранение данных пользователя
+  $("form[data-event='update']").submit(function(e) {
+    e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
-    $.post(this.action, JSON.stringify($(this).serializeArray()))
-      .done(responce => $(self).auth(responce))
-      .fail(error => $(self).fail(error));
+    let data = $(this).serializeArray(),
+      forJson = {};
+    data.forEach(function(el){
+      forJson[el.name] = el.value
+    });
+    console.log(forJson);
+    $.ajax({
+      method: 'PUT',
+      url: this.action,
+      contentType: 'application/json',
+      data: JSON.stringify(forJson)
+    })
+      .done(function(res) {
+        let responce = JSON.parse(res)
+        $().message(true, responce.status)
+      })
+      .fail(function(e) {
+        // console.log(e)
+        let error = JSON.parse(e.responseText)
+        $().message(false, error)
+      });
   });
 
   // Удаление пользователя
-  $(".delete").on('click', function (e) {
+  $('[data-event="delete"]').on('click', function (e) {
     e.preventDefault();
     let $el = e.target.closest('.item');
-    if (el && el.dataset.id) {
-      $.post("/admin/users", JSON.stringify($el.dataset.id))
-        .done(responce => $().message(true, responce))
-        .fail(error => $().message(false, error));
-    } else {
-      $().message(false, "Не найдет id пользователя")
+    if ($el && $el.dataset.id) {
+      $.ajax({
+        method: 'DELETE',
+        url: this.action,
+        contentType: 'application/json',
+        data: JSON.stringify({"id": parseInt($el.dataset.id)})
+      })
+        .done(function(res) {
+          let responce = JSON.parse(res)
+          $().message(true, responce.status)
+        })
+        .fail(function(e) {
+          console.log(e)
+          let error = JSON.parse(e.responseText)
+          $().message(false, "Не найдет id пользователя")
+        });
     }
   });
 
@@ -112,8 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (this.checkValidity() === false) return this.classList.add('was-validated');
 
     // TODO Придумать более красивый вариант
-    let data = new FormData(this),
-      map = {};
+    let data = new FormData(this), map = {};
     data.forEach((value, key) => {
       let k = key.split("_")
       if (k.length > 1) {
@@ -149,80 +191,5 @@ document.addEventListener("DOMContentLoaded", function () {
   //     })
   //   });
   // });
-
-  // Установка приложения
-  var navListItems = $('div.setup-panel a'),
-    allWells = $('.setup-content'),
-    allNextBtn = $('.nextBtn'),
-    allBackBtn = $('.backBtn');
-
-  // Скрываем все блоки
-  allWells.hide();
-
-  // Обработчики нажатия переключателей шагов
-  navListItems.click(function (e) {
-    e.preventDefault();
-    var $target = $($(this).attr('href')),
-      $item = $(this);
-
-    if (!$item.hasClass('disabled')) {
-      navListItems.removeClass('btn-primary').addClass('btn-default');
-      $item.addClass('btn-primary');
-      allWells.hide();
-      $target.show();
-      $target.find('input:eq(0)').focus();
-    }
-  });
-
-  // Обработчик кнопк Далее
-  allNextBtn.click(function () {
-    var curStep = $(this).closest(".setup-content"),
-      curStepBtn = curStep.attr("id"),
-      nextStepWizard = $('div.setup-panel a[href="#' + curStepBtn + '"]').next(),
-      curInputs = curStep.find("input[type='text'],input[type='url']"),
-      isValid = true;
-
-    $(".form-control").removeClass("is-invalid");
-    for (var i = 0; i < curInputs.length; i++) {
-      if (!curInputs[i].validity.valid) {
-        isValid = false;
-        $(curInputs[i]).closest(".form-control").addClass("is-invalid");
-      }
-    }
-
-    if (isValid)
-      nextStepWizard.removeAttr('disabled').trigger('click');
-  });
-
-  // Обработчик кнопк Назад
-  allBackBtn.click(function () {
-    var curStep = $(this).closest(".setup-content"),
-      curStepBtn = curStep.attr("id"),
-      nextStepWizard = $('div.setup-panel a[href="#' + curStepBtn + '"]').prev(),
-      curInputs = curStep.find("input[type='text'],input[type='url']");
-
-    nextStepWizard.removeAttr('disabled').trigger('click');
-  });
-
-  // Показать стартовый блок
-  $('div.setup-panel a.btn-primary').trigger('click');
-
-  // Обработчик выбора драйвера БД
-  $('.db-drivers').click(function (e) {
-    let type = $(e.target).children('input').val();
-
-    if (type == 'sqlite3') {
-      $('.bd_server').hide()
-      $('.bd_path').show()
-    } else {
-      $('.bd_server').show()
-      $('.bd_path').hide()
-    }
-  });
-
-  $('button.save').click(function(e) {
-    e.preventDefault();
-    console.log(e.target)
-  });
 
 });

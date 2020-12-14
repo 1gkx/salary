@@ -33,7 +33,7 @@ func signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := store.FindByEmail2(r.FormValue("email"))
+	u, err := store.FindByEmail(r.FormValue("email"))
 	if err != nil {
 		responceJson(401, w, ErrorUserNotFound)
 		return
