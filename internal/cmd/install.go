@@ -16,13 +16,10 @@ import (
 )
 
 var (
-	MsgSuccess = map[string]interface{}{"message": "запрос успешно выполнен"}
+	MsgSuccess         = map[string]interface{}{"status": "запрос успешно выполнен"}
+	MsgDBNameFail      = map[string]interface{}{"status": "некоректное имя базы данных"}
+	MsgUserAlredyExist = map[string]interface{}{"status": "пользователь уже существует"}
 )
-
-type AdminCreds struct {
-	Email    string `json:"adm"`
-	Password string `json:"admpass"`
-}
 
 var Install = cli.Command{
 	Name:        "install",
@@ -68,9 +65,10 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&conf.Cfg); err != nil {
-		w.WriteHeader(501)
 		fmt.Printf("Error decode conf: %s\n", err.Error())
-		json.NewEncoder(w).Encode(err.Error())
+		responceAPI(http.StatusInternalServerError, w, err.Error())
+		// w.WriteHeader(501)
+		// json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
@@ -78,9 +76,10 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 		db := strings.Split(conf.Cfg.Database.Path, ".")
 		conf.Cfg.Database.Path = fmt.Sprintf("data/%s.db", db[0])
 		if len(db) > 2 || len(db) == 0 {
-			w.WriteHeader(501)
 			fmt.Printf("database name incorrect")
-			json.NewEncoder(w).Encode("database name incorrect")
+			responceAPI(http.StatusInternalServerError, w, MsgDBNameFail)
+			// w.WriteHeader(501)
+			// json.NewEncoder(w).Encode("database name incorrect")
 			return
 		}
 		if len(db) == 1 {
@@ -104,14 +103,16 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 		Admin:     "true",
 	}
 	if err := store.AddUser(admin); err != nil {
-		w.WriteHeader(501)
 		fmt.Printf("Error: %s\n", err.Error())
-		json.NewEncoder(w).Encode(err.Error())
+		responceAPI(http.StatusOK, w, MsgSuccess)
+		// responceAPI(http.StatusInternalServerError, w, MsgUserAlredyExist)
+		// json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(MsgSuccess)
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(MsgSuccess)
+	responceAPI(http.StatusOK, w, MsgSuccess)
 	return
 }
 
@@ -123,4 +124,10 @@ func responce(w http.ResponseWriter, r *http.Request, tmpl string, data interfac
 			"data": data,
 		},
 	)
+}
+
+func responceAPI(code int, w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(data)
 }

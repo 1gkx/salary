@@ -281,8 +281,14 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 
     $.post(this.action, JSON.stringify(map))
-      .done(responce => $().message(true, responce))
-      .fail(error => $().message(false, error));
+      .done(responce => {
+        console.log(responce)
+        $().message(true, responce.status)
+      })
+      .fail(error => {
+        // console.log(error)
+        $().message(false, error.responseJSON.status)
+      });
   });
 
 });
