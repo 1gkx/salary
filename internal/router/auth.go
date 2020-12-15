@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	ErrorAuthFail     = map[string]interface{}{"message": "Ошибка авторизации"}
-	ErrorUserNotFound = map[string]interface{}{"message": "Пользователь не найден"}
-	ErrorServer       = map[string]interface{}{"message": "Ошибка на сервере банка. Повторите попытку позже"}
+	ErrorAuthFail        = map[string]interface{}{"message": "Ошибка авторизации: неверный логин или пароль"}
+	ErrorUserNotFound    = map[string]interface{}{"message": "Ошибка авторизации: пользователь не найден"}
+	ErrorServer          = map[string]interface{}{"message": "Ошибка на сервере банка. Повторите попытку позже"}
+	ErrorSMSVerifycation = map[string]interface{}{"message": "Ошибка авторизации: cмс код не подтвержден"}
 )
 
 func setSignInRouters() {
@@ -62,9 +63,7 @@ func signin(w http.ResponseWriter, r *http.Request) {
 func verify(w http.ResponseWriter, r *http.Request) {
 
 	if !session.CheckSms(r) {
-		responceJson(401, w, map[string]interface{}{
-			"message": "Смс код не подтвержден",
-		})
+		responceJson(401, w, ErrorSMSVerifycation)
 		return
 	}
 

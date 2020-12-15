@@ -1,9 +1,11 @@
 # Create temporary frontend backend
 FROM golang:rc-alpine as backend
-COPY . /build/src/
-RUN apk add --no-cache --virtual .build-deps --update gcc musl-dev git make\
-    && cd /build/src/ && export GOPROXY=http://192.168.105.9/repository/go-proxy \
-    && export GOSUMDB=off &&  go mod download && make buildprod
+COPY ./.. /build/src/
+RUN apk add --no-cache --virtual .build-deps --update gcc musl-dev git make && \
+    cd /build/src/ && \
+    export GOPROXY=http://192.168.105.9/repository/go-proxy && export GOSUMDB=off && \
+    go mod download && \
+    make buildprod
 
 # Create prodaction application container
 FROM scratch as production
