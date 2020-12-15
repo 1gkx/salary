@@ -20,12 +20,18 @@ type mail struct {
 	Password string `json:"password";ini:"password"`
 }
 
+type admin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Config struct {
 	Prod     bool              `json:"prod";ini:"prod"`
 	Database database          `json:"database";ini:"database"`
 	Mail     mail              `json:"mail";ini:"mail"`
 	Gateway  string            `json:"gateway";ini:"gateway"`
 	Methods  map[string]string `json:"methods";ini:"methods"`
+	Admin    admin             `json:admin`
 }
 
 var Cfg *Config

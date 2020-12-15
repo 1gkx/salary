@@ -6,12 +6,23 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/1gkx/salary/internal/conf"
+	"github.com/1gkx/salary/internal/store"
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli"
 	// "github.com/1gkx/salary/internal/template"
 )
+
+var (
+	MsgSuccess = map[string]interface{}{"message": "запрос успешно выполнен"}
+)
+
+type AdminCreds struct {
+	Email    string `json:"adm"`
+	Password string `json:"admpass"`
+}
 
 var Install = cli.Command{
 	Name:        "install",
@@ -51,20 +62,56 @@ func getInstallForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func setSettings2(w http.ResponseWriter, r *http.Request) {
+
+	if err := conf.Read(); err != nil {
+		panic(err)
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&conf.Cfg); err != nil {
+		w.WriteHeader(501)
+		fmt.Printf("Error decode conf: %s\n", err.Error())
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+
+	if conf.Cfg.Database.Driver == "sqlite3" {
+		db := strings.Split(conf.Cfg.Database.Path, ".")
+		conf.Cfg.Database.Path = fmt.Sprintf("data/%s.db", db[0])
+		if len(db) > 2 || len(db) == 0 {
+			w.WriteHeader(501)
+			fmt.Printf("database name incorrect")
+			json.NewEncoder(w).Encode("database name incorrect")
+			return
+		}
+		if len(db) == 1 {
+			conf.Cfg.Database.Path = fmt.Sprintf("data/%s.db", db[0])
+		}
+	}
+	fmt.Printf("Config: %+v\n", conf.Cfg)
+	conf.Save()
+
+	if err := store.Initialize(); err != nil {
+		panic(err)
+	}
+	defer store.GetEnginie().Close()
+
+	admin := &store.User{
+		FirstName: "Администратор",
+		LastName:  "Системы",
+		Email:     conf.Cfg.Admin.Email,
+		Phone:     "+7 (999) 618-51-15",
+		Password:  conf.Cfg.Admin.Password,
+		Admin:     "true",
+	}
+	if err := store.AddUser(admin); err != nil {
 		w.WriteHeader(501)
 		fmt.Printf("Error: %s\n", err.Error())
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
-	conf.Save()
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "Данные успешно сохранены",
-	})
+	json.NewEncoder(w).Encode(MsgSuccess)
 	return
 }
 

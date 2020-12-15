@@ -1,7 +1,6 @@
 package store
 
 import (
-	"database/sql"
 	"errors"
 	"strconv"
 	"strings"
@@ -126,13 +125,16 @@ func (u *User) Valid() bool {
 }
 
 func IsUserExist(email string) bool {
-	return x.Raw(
-		"SELECT * FROM users WHERE @mail",
-		sql.Named(
-			"mail",
-			strings.ToLower(email),
-		),
-	).Scan(&User{}).RowsAffected > 0
+	// return x.Raw(
+	// 	"SELECT * FROM users WHERE email = @mail",
+	// 	sql.Named(
+	// 		"mail",
+	// 		strings.ToLower(email),
+	// 	),
+	// ).Scan(&User{}).RowsAffected > 0
+
+	return x.Debug().Where("email = ?", strings.ToLower(email)).Find(&User{}).RowsAffected > 0
+	// x.Debug().Where(&User{Email: strings.ToLower(email)}).Find(&User{}).RowsAffected > 0
 }
 
 // ComparePass ..

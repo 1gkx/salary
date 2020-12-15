@@ -39,7 +39,7 @@ func Post(data interface{}, method string) (*Responce, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Action", method)
 	req.Header.Set("HOOK", "Y")
-	req.Header.Set("TEST", "Y")
+	// req.Header.Set("TEST", "Y")
 
 	client := &http.Client{Timeout: 300 * time.Second}
 	r, err := client.Do(req)

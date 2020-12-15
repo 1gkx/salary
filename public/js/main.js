@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
   })
 
   // Переключатели типа базы данных
-  $('input[type=radio]').on('change', function(e) {
+  $('input[type=radio]').on('change', function (e) {
     if (this.value == "sqlite3") {
       $('.database_server').addClass('d-none')
       $('.database_path').removeClass('d-none')
@@ -75,23 +75,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Авторизация и верификация
-  $(".login").submit(function(e) {
+  $(".login").submit(function (e) {
     let self = this;
     e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
     $.post(this.action, $(this).serializeArray())
-    .done(function(res) {
-      let responce = JSON.parse(res)
-      $(self).auth(responce)
-    })
-    .fail(function(e) {
-      let error = JSON.parse(e.responseText)
-      $(self).fail(error.data.message)
-    });
+      .done(function (res) {
+        let responce = JSON.parse(res)
+        $(self).auth(responce)
+      })
+      .fail(function (e) {
+        let error = JSON.parse(e.responseText)
+        $(self).fail(error.data.message)
+      });
   });
 
   // Сохранение данных пользователя
-  $(".adduser").submit(function(e) {
+  $(".adduser").submit(function (e) {
     e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
     $.post(this.action, JSON.stringify($(this).serializeArray()))
@@ -100,26 +100,26 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Сохранение данных пользователя
-  $("form[data-event='update']").submit(function(e) {
+  $("form[data-event='update']").submit(function (e) {
     e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
     let data = $(this).serializeArray(),
       forJson = {};
-    data.forEach(function(el){
+    data.forEach(function (el) {
       forJson[el.name] = el.value
     });
     console.log(forJson);
     $.ajax({
-      method: 'PUT',
-      url: this.action,
-      contentType: 'application/json',
-      data: JSON.stringify(forJson)
-    })
-      .done(function(res) {
+        method: 'PUT',
+        url: this.action,
+        contentType: 'application/json',
+        data: JSON.stringify(forJson)
+      })
+      .done(function (res) {
         let responce = JSON.parse(res)
         $().message(true, responce.status)
       })
-      .fail(function(e) {
+      .fail(function (e) {
         // console.log(e)
         let error = JSON.parse(e.responseText)
         $().message(false, error)
@@ -132,16 +132,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let $el = e.target.closest('.item');
     if ($el && $el.dataset.id) {
       $.ajax({
-        method: 'DELETE',
-        url: this.action,
-        contentType: 'application/json',
-        data: JSON.stringify({"id": parseInt($el.dataset.id)})
-      })
-        .done(function(res) {
+          method: 'DELETE',
+          url: this.action,
+          contentType: 'application/json',
+          data: JSON.stringify({
+            "id": parseInt($el.dataset.id)
+          })
+        })
+        .done(function (res) {
           let responce = JSON.parse(res)
           $().message(true, responce.status)
         })
-        .fail(function(e) {
+        .fail(function (e) {
           console.log(e)
           let error = JSON.parse(e.responseText)
           $().message(false, "Не найдет id пользователя")
@@ -155,7 +157,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (this.checkValidity() === false) return this.classList.add('was-validated');
 
     // TODO Придумать более красивый вариант
-    let data = new FormData(this), map = {};
+    let data = new FormData(this),
+      map = {};
     data.forEach((value, key) => {
       let k = key.split("_")
       if (k.length > 1) {
@@ -191,5 +194,95 @@ document.addEventListener("DOMContentLoaded", function () {
   //     })
   //   });
   // });
+
+  // Установка приложения
+  var navListItems = $('div.setup-panel a'),
+    allWells = $('.setup-content'),
+    allNextBtn = $('.nextBtn'),
+    allBackBtn = $('.backBtn');
+
+  // Скрываем все блоки
+  allWells.hide();
+
+  // Обработчики нажатия переключателей шагов
+  navListItems.click(function (e) {
+    e.preventDefault();
+    var $target = $($(this).attr('href')),
+      $item = $(this);
+
+    if (!$item.hasClass('disabled')) {
+      navListItems.removeClass('btn-primary').addClass('btn-default');
+      $item.addClass('btn-primary');
+      allWells.hide();
+      $target.show();
+      $target.find('input:eq(0)').focus();
+    }
+  });
+
+  // Обработчик кнопк Далее
+  allNextBtn.click(function () {
+    var curStep = $(this).closest(".setup-content"),
+      curStepBtn = curStep.attr("id"),
+      nextStepWizard = $('div.setup-panel a[href="#' + curStepBtn + '"]').next(),
+      curInputs = curStep.find("input[type='text'],input[type='url']"),
+      isValid = true;
+
+    $(".form-control").removeClass("is-invalid");
+    for (var i = 0; i < curInputs.length; i++) {
+      if (!curInputs[i].validity.valid) {
+        isValid = false;
+        $(curInputs[i]).closest(".form-control").addClass("is-invalid");
+      }
+    }
+
+    if (isValid)
+      nextStepWizard.removeAttr('disabled').trigger('click');
+  });
+
+  // Обработчик кнопк Назад
+  allBackBtn.click(function () {
+    var curStep = $(this).closest(".setup-content"),
+      curStepBtn = curStep.attr("id"),
+      nextStepWizard = $('div.setup-panel a[href="#' + curStepBtn + '"]').prev(),
+      curInputs = curStep.find("input[type='text'],input[type='url']");
+
+    nextStepWizard.removeAttr('disabled').trigger('click');
+  });
+
+  // Показать стартовый блок
+  $('div.setup-panel a.btn-primary').trigger('click');
+
+  // Обработчик выбора драйвера БД
+  $('.db-drivers').click(function (e) {
+    let type = $(e.target).children('input').val();
+
+    if (type == 'sqlite3') {
+      $('.bd_server').hide()
+      $('.bd_path').show()
+    } else {
+      $('.bd_server').show()
+      $('.bd_path').hide()
+    }
+  });
+
+  $('[data-event="install"]').submit(function (e) {
+    e.preventDefault();
+    
+    let data = new FormData(this),
+      map = {};
+    data.forEach((value, key) => {
+      let k = key.split("_")
+      if (k.length > 1) {
+        if (!map[k[0]]) map[k[0]] = {}
+        map[k[0]][k[1]] = value
+      } else {
+        map[key] = value
+      }
+    })
+
+    $.post(this.action, JSON.stringify(map))
+      .done(responce => $().message(true, responce))
+      .fail(error => $().message(false, error));
+  });
 
 });
