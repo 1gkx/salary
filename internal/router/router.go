@@ -60,6 +60,7 @@ func profile(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func responceJson(code int, w http.ResponseWriter, data map[string]interface{}) {
 	w.WriteHeader(code)
+	w.Header().Set("Cache-Control", "No-Cache")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"code": code,
 		"data": data,
@@ -67,6 +68,7 @@ func responceJson(code int, w http.ResponseWriter, data map[string]interface{}) 
 }
 
 func responce(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}) {
+	w.Header().Set("Cache-Control", "No-Cache")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	templates.Templates.ExecuteTemplate(w, tmpl,
 		map[string]interface{}{

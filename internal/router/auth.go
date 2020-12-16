@@ -79,7 +79,9 @@ func verify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vs := map[string]interface{}{
-		"isVeryfy": true,
+		"sms_code":   nil,
+		"expired_at": nil,
+		"isVeryfy":   true,
 	}
 	fmt.Println("Сохранение куки при верификации")
 	session.Add(r, w, vs)
