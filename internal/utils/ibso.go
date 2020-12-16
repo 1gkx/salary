@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"math/rand"
+	"strconv"
+
 	"net/http"
 	"time"
 
@@ -26,7 +29,12 @@ func Post(data interface{}, method string) (*Responce, error) {
 		return returnTestCode()
 	}
 
-	jdata, _ := json.Marshal(data)
+	// ['phone' => preg_replace('/[^0-9]+/', '', $request->get('mobilePhoneClient'))],
+	send_data := map[string]interface{}{
+		"phone": data,
+	}
+
+	jdata, _ := json.Marshal(send_data)
 	req, err := http.NewRequest(
 		"POST",
 		conf.Cfg.Gateway,
@@ -39,7 +47,6 @@ func Post(data interface{}, method string) (*Responce, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Action", method)
 	req.Header.Set("HOOK", "Y")
-	// req.Header.Set("TEST", "Y")
 
 	client := &http.Client{Timeout: 300 * time.Second}
 	r, err := client.Do(req)
@@ -65,8 +72,24 @@ func (res *Responce) GetExpiredSmsCode() string {
 }
 
 func returnTestCode() (*Responce, error) {
-	var d = []byte(`{"data":[{"code":"1234"}],"error":"","extra":"СМС успешно отправлено","result":"1"}`)
+
+	code := randomSmsCode()
+	tmpl := fmt.Sprintf(
+		"{\"data\":[{\"code\":\"%s\"}],\"error\":\"\",\"extra\":\"СМС успешно отправлено\",\"result\":\"1\"}",
+		code,
+	)
+	var d = []byte(tmpl)
 	res123 := new(Responce)
 	json.Unmarshal(d, &res123)
 	return res123, nil
 }
+
+func randomSmsCode() string {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return strconv.Itoa(randInt(1000, 9999))
+}
+
+func randInt(min int, max int) int {
+    return min + rand.Intn(max-min)
+}
+

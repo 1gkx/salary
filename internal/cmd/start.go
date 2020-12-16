@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -34,18 +35,21 @@ func runWeb(c *cli.Context) {
 
 	router := router.NewRouter()
 
-	if conf.Prod() {
-		// Для production версии
-		if err := http.ListenAndServe(":8000", router); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		// Для local версии. Т.к. куки шифрованные, необходимо https соединение. Добавить в host: 127.0.0.1 salary.pskb.ad
-		// Сертификаты для localhost в папке conf/cert
-		if err := http.ListenAndServeTLS(":443", "conf/cert/cert.pem", "conf/cert/key.pem", router); err != nil {
-			log.Fatal(err)
-		}
+	fmt.Printf("Server start at %s port\n", ":8000")
+	if err := http.ListenAndServeTLS(":443", "conf/cert/cert.pem", "conf/cert/key.pem", router); err != nil {
+		log.Fatal(err)
 	}
-	
-	
+	// if conf.Prod() {
+	// 	// Для production версии
+	// 	if err := http.ListenAndServe(":8000", router); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// } else {
+	// 	// Для local версии. Т.к. куки шифрованные, необходимо https соединение. Добавить в host: 127.0.0.1 salary.pskb.ad
+	// 	// Сертификаты для localhost в папке conf/cert
+	// 	if err := http.ListenAndServeTLS(":443", "conf/cert/cert.pem", "conf/cert/key.pem", router); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
+
 }

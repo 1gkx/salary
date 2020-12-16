@@ -136,11 +136,11 @@ func userRemove(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		return
 	}
 
-	// if err := store.DeleteUser(u); err != nil {
-	// 	w.WriteHeader(501)
-	// 	json.NewEncoder(w).Encode("{ status: Fail }")
-	// 	return
-	// }
+	if err := store.DeleteUserByID(u.ID); err != nil {
+		w.WriteHeader(501)
+		json.NewEncoder(w).Encode("{ status: Fail }")
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

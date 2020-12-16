@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/1gkx/salary/internal/conf"
@@ -45,6 +46,11 @@ func signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// if err := utils.Send(u.Email, res.GetSmsCode()); err != nil {
+	// 	responceJson(501, w, ErrorServer)
+	// 	return
+	// }
+
 	vs := map[string]interface{}{
 		"sms_code":   res.GetSmsCode(),
 		"user":       u.Email,
@@ -52,7 +58,12 @@ func signin(w http.ResponseWriter, r *http.Request) {
 		"isAuth":     true,
 		"isVeryfy":   false,
 	}
+
+	//////////////////////////
+	fmt.Printf("Session value: %+v\n", vs)
+	fmt.Println("Сохранение куки при авторизации")
 	session.Add(r, w, vs)
+	//////////////////////
 
 	responceJson(http.StatusOK, w, map[string]interface{}{
 		"auth": true,
@@ -70,6 +81,7 @@ func verify(w http.ResponseWriter, r *http.Request) {
 	vs := map[string]interface{}{
 		"isVeryfy": true,
 	}
+	fmt.Println("Сохранение куки при верификации")
 	session.Add(r, w, vs)
 
 	responceJson(200, w, map[string]interface{}{
@@ -80,8 +92,10 @@ func verify(w http.ResponseWriter, r *http.Request) {
 
 func logout(w http.ResponseWriter, r *http.Request) {
 
-	session.Reset(r, w)
+	fmt.Println("Сохранение куки при удалении")
+	session.Delete(r, w)
 
+	w.Header().Set("Cache-Control", "No-Cache")
 	http.Redirect(w, r, "/login", 301)
 	return
 }

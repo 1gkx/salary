@@ -16,10 +16,13 @@ import (
 )
 
 var (
-	MsgSuccess         = map[string]interface{}{"status": "запрос успешно выполнен"}
-	MsgDBNameFail      = map[string]interface{}{"status": "некоректное имя базы данных"}
-	MsgUserAlredyExist = map[string]interface{}{"status": "пользователь уже существует"}
+	MsgSuccess = map[string]interface{}{"message": "запрос успешно выполнен"}
 )
+
+type AdminCreds struct {
+	Email    string `json:"adm"`
+	Password string `json:"admpass"`
+}
 
 var Install = cli.Command{
 	Name:        "install",
@@ -38,20 +41,26 @@ func install(c *cli.Context) {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.NotFoundHandler = http.HandlerFunc(errorhendler)
-	router.HandleFunc("/", getInstallForm).Methods("GET")
+	router.HandleFunc("/", redir).Methods("GET")
+	router.HandleFunc("/install", getInstallForm).Methods("GET")
 	router.HandleFunc("/", setSettings2).Methods("POST")
 	publicFolder := http.FileServer(http.Dir("./public"))
 	router.PathPrefix("/js/").Handler(publicFolder)
 	router.PathPrefix("/css/").Handler(publicFolder)
 	router.PathPrefix("/img/").Handler(publicFolder)
 
-	if err := http.ListenAndServeTLS(":443", "conf/cert/cert.pem", "conf/cert/key.pem", router); err != nil {
+	// Для production версии
+	if err := http.ListenAndServe(":8000", router); err != nil {
 		log.Fatal(err)
 	}
-
 }
 func errorhendler(w http.ResponseWriter, r *http.Request) {
 	responce(w, r, "status/40x", nil)
+}
+
+func redir(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/install", 301)
+	return
 }
 
 func getInstallForm(w http.ResponseWriter, r *http.Request) {
@@ -65,10 +74,9 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&conf.Cfg); err != nil {
+		w.WriteHeader(501)
 		fmt.Printf("Error decode conf: %s\n", err.Error())
-		responceAPI(http.StatusInternalServerError, w, err.Error())
-		// w.WriteHeader(501)
-		// json.NewEncoder(w).Encode(err.Error())
+		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
@@ -76,10 +84,9 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 		db := strings.Split(conf.Cfg.Database.Path, ".")
 		conf.Cfg.Database.Path = fmt.Sprintf("data/%s.db", db[0])
 		if len(db) > 2 || len(db) == 0 {
+			w.WriteHeader(501)
 			fmt.Printf("database name incorrect")
-			responceAPI(http.StatusInternalServerError, w, MsgDBNameFail)
-			// w.WriteHeader(501)
-			// json.NewEncoder(w).Encode("database name incorrect")
+			json.NewEncoder(w).Encode("database name incorrect")
 			return
 		}
 		if len(db) == 1 {
@@ -103,16 +110,14 @@ func setSettings2(w http.ResponseWriter, r *http.Request) {
 		Admin:     "true",
 	}
 	if err := store.AddUser(admin); err != nil {
+		w.WriteHeader(501)
 		fmt.Printf("Error: %s\n", err.Error())
-		responceAPI(http.StatusOK, w, MsgSuccess)
-		// responceAPI(http.StatusInternalServerError, w, MsgUserAlredyExist)
-		// json.NewEncoder(w).Encode(err.Error())
+		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 
-	// w.WriteHeader(http.StatusOK)
-	// json.NewEncoder(w).Encode(MsgSuccess)
-	responceAPI(http.StatusOK, w, MsgSuccess)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(MsgSuccess)
 	return
 }
 
@@ -124,10 +129,4 @@ func responce(w http.ResponseWriter, r *http.Request, tmpl string, data interfac
 			"data": data,
 		},
 	)
-}
-
-func responceAPI(code int, w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(data)
 }

@@ -9,20 +9,28 @@ import(
 
 func Send(recipient string, password string) error{
 
-	if !conf.Prod() {
-		fmt.Printf("Сообщение отправлено на email-адрес %s\n", recipient)
-		return nil
-	}
+	// if !conf.Prod() {
+	// 	fmt.Printf("Сообщение отправлено на email-адрес %s\n", recipient)
+	// 	return nil
+	// }
 
 	from := "admin@pskb.com" // TODO вынести в конфиг
 
 	// TODO Переделать на шаблон
+	// msg := "From: " + from + "\n" +
+	// 	"Content-Type: text/html; charset=utf-8;\n" +
+	// 	"Subject: Регистрация в сервисе 'Зарплатный поект'\n\n" +
+	// 	"<html><body><h3>Добрый день!</h3>" +
+	// 	"<p>Вы зарегистрировались в сервисе 'Зарплатный проект'!</p>" +
+	// 	"Ваш пароль для входа: " + password +
+	// 	"</body></html>"
+
 	msg := "From: " + from + "\n" +
 		"Content-Type: text/html; charset=utf-8;\n" +
-		"Subject: Регистрация в сервисе 'Зарплатный поект'\n\n" +
+		"Subject: Смс код для входа в 'Зарплатный поект'\n\n" +
 		"<html><body><h3>Добрый день!</h3>" +
-		"<p>Вы зарегистрировались в сервисе 'Зарплатный проект'!</p>" +
-		"Ваш пароль для входа: " + password +
+		"<p>Вы запросили смс код для входа в сервисе 'Зарплатный проект'!</p>" +
+		"Ваш смс код для входа: " + password +
 		"</body></html>"
 
 	if err := smtp.SendMail(

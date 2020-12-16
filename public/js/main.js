@@ -94,9 +94,34 @@ document.addEventListener("DOMContentLoaded", function () {
   $(".adduser").submit(function (e) {
     e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
-    $.post(this.action, JSON.stringify($(this).serializeArray()))
-      .done(responce => $().message(true, responce))
-      .fail(error => $().message(false, error));
+
+    let data = $(this).serializeArray(),
+      forJson = {};
+    data.forEach(function (el) {
+      forJson[el.name] = el.value
+    });
+    console.log(forJson);
+
+    $.ajax({
+      method: 'POST',
+      url: this.action,
+      contentType: 'application/json',
+      data: JSON.stringify(forJson)
+    })
+    .done(function (res) {
+      // let responce = JSON.parse(res)
+      // $().message(true, responce.status)
+      return document.location.href = '/admin/users'
+    })
+    .fail(function (e) {
+      // console.log(e)
+      let error = JSON.parse(e.responseText)
+      $().message(false, error)
+    });
+
+    // $.post(this.action, JSON.stringify($(this).serializeArray()))
+    //   .done(responce => $().message(true, responce))
+    //   .fail(error => $().message(false, error));
   });
 
   // Сохранение данных пользователя
@@ -281,14 +306,8 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 
     $.post(this.action, JSON.stringify(map))
-      .done(responce => {
-        console.log(responce)
-        $().message(true, responce.status)
-      })
-      .fail(error => {
-        // console.log(error)
-        $().message(false, error.responseJSON.status)
-      });
+      .done(responce => $().message(true, responce))
+      .fail(error => $().message(false, error));
   });
 
 });

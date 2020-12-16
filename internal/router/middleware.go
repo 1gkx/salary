@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/codegangsta/negroni"
@@ -12,6 +13,8 @@ func requireCookieAuth(w http.ResponseWriter, r *http.Request, next http.Handler
 
 	if c, _ := session.Get(r); len(c.ID) > 0 {
 
+		fmt.Printf("Middleware session: %+v\n", c)
+
 		isAuth, _ := c.Values["isAuth"].(bool)
 		isVerify, _ := c.Values["isVeryfy"].(bool)
 
@@ -20,7 +23,8 @@ func requireCookieAuth(w http.ResponseWriter, r *http.Request, next http.Handler
 			return
 		}
 	}
-	session.Reset(r, w)
+	session.Delete(r, w)
+	w.Header().Set("Cache-Control", "No-Cache")
 	http.Redirect(w, r, "/login", 301)
 }
 

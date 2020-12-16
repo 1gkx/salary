@@ -13,7 +13,10 @@ import (
 
 var S *gormstore.Store
 
-const cookieName = "__ssid"
+const (
+	cookieName   = "__ssid"
+	cookieAgeMax = 60 * 60 * 1 // 1 hours
+)
 
 type sms struct {
 	Code    string
@@ -41,7 +44,7 @@ func Start() {
 
 	S.SessionOpts.Secure = true
 	S.SessionOpts.HttpOnly = true
-	S.SessionOpts.MaxAge = 60 * 60 * 1 // 1 hours
+	S.SessionOpts.MaxAge = cookieAgeMax
 }
 
 func Get(r *http.Request) (*sessions.Session, error) {
@@ -70,51 +73,52 @@ func IsAdmin(r *http.Request) bool {
 // 	return isAdmin
 // }
 
-func Reset(r *http.Request, w http.ResponseWriter) {
-	vs := map[string]interface{}{
-		"sms_code":   nil,
-		"user":       nil,
-		"expired_at": nil,
-		"isAuth":     false,
-		"isVeryfy":   false,
-	}
-	Add(r, w, vs)
-}
+// func Reset(r *http.Request, w http.ResponseWriter) {
+// 	vs := map[string]interface{}{
+// 		"sms_code":   nil,
+// 		"user":       nil,
+// 		"expired_at": nil,
+// 		"isAuth":     false,
+// 		"isVeryfy":   false,
+// 	}
+// 	Add(r, w, vs)
+// }
 
 func Delete(r *http.Request, w http.ResponseWriter) {
-	val := map[string]interface{}{
-		"sms_code":   nil,
-		"user":       nil,
-		"expired_at": nil,
-		"isAuth":     false,
-		"isVeryfy":   false,
-	}
 
+	S.MaxAge(-1)
 	st, err := S.New(r, cookieName)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	for key, value := range val {
-		st.Values[key] = value
-	}
-	S.MaxAge(-1)
 	if err = S.Save(r, w, st); err != nil {
 		fmt.Println(err.Error())
 	}
 	S.Cleanup()
+	S.MaxAge(cookieAgeMax)
 }
 
 // Add ...
 func Add(r *http.Request, w http.ResponseWriter, val map[string]interface{}) error {
 
-	st, err := S.New(r, cookieName)
+	st, err := S.Get(r, cookieName)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
+
+	if len(st.ID) == 0 {
+		st, err = S.New(r, cookieName)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		// fmt.Printf("Session nil: %+v\n", st)
+	}
+
 	for key, value := range val {
 		st.Values[key] = value
 	}
+
 	if err = S.Save(r, w, st); err != nil {
 		fmt.Println(err.Error())
 		return err
