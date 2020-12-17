@@ -44,6 +44,8 @@
       if (responce.code == 200 && responce.data.auth) {
         this.addClass('d-none')
         $('.verify').removeClass('d-none')
+        var deadline = new Date(Date.parse(new Date()) + 2 * 60 * 1000); // for endless timer
+        initializeClock("countdown", deadline);
       }
     }
   })
@@ -129,10 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
     let data = $(this).serializeArray(),
+      self = this,
       forJson = {};
     data.forEach(function (el) {
       forJson[el.name] = el.value
     });
+    forJson.id = parseInt(forJson.id)
     console.log(forJson);
     $.ajax({
         method: 'PUT',
@@ -142,12 +146,12 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .done(function (res) {
         let responce = JSON.parse(res)
-        $().message(true, responce.status)
+        return document.location.href = self.dataset.redirect
       })
       .fail(function (e) {
         // console.log(e)
         let error = JSON.parse(e.responseText)
-        $().message(false, error)
+        $().message(false, error.status)
       });
   });
 
@@ -181,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     if (this.checkValidity() === false) return this.classList.add('was-validated');
 
-    // TODO Придумать более красивый вариант
+    // Вынести в отдельную функцию | Придумать более красивый вариант
     let data = new FormData(this),
       map = {};
     data.forEach((value, key) => {
@@ -292,7 +296,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   $('[data-event="install"]').submit(function (e) {
     e.preventDefault();
-    
+
+    // Вынести в отдельную функцию
     let data = new FormData(this),
       map = {};
     data.forEach((value, key) => {
@@ -311,3 +316,38 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
+
+function getTimeRemaining(endtime) {
+  var t = Date.parse(endtime) - Date.parse(new Date());
+  var seconds = Math.floor((t / 1000) % 60);
+  var minutes = Math.floor((t / 1000 / 60) % 60);
+  return {
+    total: t,
+    minutes: minutes,
+    seconds: seconds
+  };
+}
+
+function initializeClock(id, endtime) {
+  console.log(endtime)
+  var clock = document.getElementById(id);
+  var minutesSpan = clock.querySelector(".minutes");
+  var secondsSpan = clock.querySelector(".seconds");
+
+  function updateClock() {
+    var t = getTimeRemaining(endtime);
+
+    if (t.total <= 0) {
+      $('#countdown').addClass("d-none");
+      $('#sms-repeat').removeClass("d-none");
+      clearInterval(timeinterval);
+      return true;
+    }
+
+    minutesSpan.innerHTML = ("0" + t.minutes).slice(-2);
+    secondsSpan.innerHTML = ("0" + t.seconds).slice(-2);
+  }
+
+  updateClock();
+  var timeinterval = setInterval(updateClock, 1000);
+}

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/codegangsta/negroni"
+	log "unknwon.dev/clog/v2"
+
 	"github.com/1gkx/salary/internal/conf"
 	"github.com/1gkx/salary/internal/session"
 	"github.com/1gkx/salary/internal/store"
@@ -18,10 +21,17 @@ var (
 )
 
 func setSignInRouters() {
+
+	err := log.NewConsole()
+	if err != nil {
+		panic("unable to create new logger: " + err.Error())
+	}
+
 	r.HandleFunc("/login", login).Methods("GET")
 	r.HandleFunc("/login", signin).Methods("POST")
 	r.HandleFunc("/verify", verify).Methods("POST")
 	r.HandleFunc("/logout", logout).Methods("GET")
+
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +63,7 @@ func signin(w http.ResponseWriter, r *http.Request) {
 
 	vs := map[string]interface{}{
 		"sms_code":   res.GetSmsCode(),
+		"userID":     u.ID,
 		"user":       u.Email,
 		"expired_at": res.GetExpiredSmsCode(),
 		"isAuth":     true,
@@ -100,4 +111,30 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "No-Cache")
 	http.Redirect(w, r, "/login", 301)
 	return
+}
+
+func requireCookieAuth(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	if c, _ := session.Get(r); len(c.ID) > 0 {
+
+		log.Trace("Middleware session: %+v\n", c)
+
+		isAuth, _ := c.Values["isAuth"].(bool)
+		isVerify, _ := c.Values["isVeryfy"].(bool)
+
+		if isAuth && isVerify {
+			next.ServeHTTP(w, r)
+			return
+		}
+	}
+	session.Delete(r, w)
+	w.Header().Set("Cache-Control", "No-Cache")
+	http.Redirect(w, r, "/login", 301)
+}
+
+func authRequireHandlerWrap(fn func(http.ResponseWriter, *http.Request, http.HandlerFunc)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(requireCookieAuth),
+		negroni.HandlerFunc(fn),
+	)
 }

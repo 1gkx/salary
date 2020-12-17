@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -18,17 +19,13 @@ var (
 // User ...
 type User struct {
 	gorm.Model
-	// ID        uint `json:"id";gorm:"primary_key"`
-	// CreatedAt time.Time
-	// UpdatedAt time.Time
-	// DeletedAt *time.Time `sql:"index"`
 	FirstName   string `json:"firstname";gorm:"not null"`
 	LastName    string `json:"lastname";gorm:"not null`
 	Email       string `json:"email";gorm:"unique,not null"`
 	Phone       string `json:"phone"`
 	Password    string `json:"password,omitempty"`
-	NewPassword string `json:"newpassword"`
-	Admin       string `json:"admin";gorm:"default:false"`
+	NewPassword string `json:"newpassword,omitempty;gorm:"-""`
+	Admin       string `json:"admin,omitempty";gorm:"default:false"`
 }
 
 /** CRUD Methods **/
@@ -38,13 +35,10 @@ func AddUser(u *User) error {
 		return UserNotValid
 	}
 
-	if IsUserExist(u.Email) {
+	if IsUserExist(u) {
 		return UserAlreadyExist
 	}
-
-	if password, err := bcrypt.GenerateFromPassword([]byte(u.Password), 0); err == nil {
-		u.Password = string(password)
-	}
+	u.HashPass()
 
 	return x.Create(u).Error
 }
@@ -68,6 +62,7 @@ func FindUserLimit(page string) []*User {
 }
 
 func UpdateUser(u *User) error {
+	u.HashPass()
 	return x.Save(u).Error
 }
 
@@ -82,19 +77,6 @@ func DeleteUserByID(id uint) error {
 	return errors.New("id is not valid")
 }
 
-/** Helper functions **/
-// func FindByEmail2(email string) (*User, error) {
-// u := new(User)
-// err := x.Raw("SELECT * FROM users WHERE email = ?", email).Scan(&u).Error
-// if err == nil {
-// 	return UserAlreadyExist
-// }
-// if err == gorm.ErrRecordNotFound {
-// 	return nil
-// }
-// return err
-// }
-
 func FindByEmail(email string) (*User, error) {
 	u := new(User)
 	if err := x.Raw("SELECT * FROM users WHERE email = ?", email).Scan(&u).Error; err != nil {
@@ -103,7 +85,7 @@ func FindByEmail(email string) (*User, error) {
 	return u, nil
 }
 
-func FindByID(id string) *User {
+func FindByID(id uint) *User {
 	u := new(User)
 	x.Raw("SELECT * FROM users WHERE id = ?", id).Scan(&u)
 	return u
@@ -124,23 +106,29 @@ func (u *User) Valid() bool {
 	return strings.Contains(u.Email, "@") && len(u.FirstName) > 0 && len(u.LastName) > 0 && len(u.Phone) > 0
 }
 
-func IsUserExist(email string) bool {
-	// return x.Raw(
-	// 	"SELECT * FROM users WHERE email = @mail",
-	// 	sql.Named(
-	// 		"mail",
-	// 		strings.ToLower(email),
-	// 	),
-	// ).Scan(&User{}).RowsAffected > 0
+func IsUserExist(u *User) bool {
+	return x.Debug().Where("id = ? OR email = ?", u.ID, strings.ToLower(u.Email)).Find(&User{}).RowsAffected > 0
+}
 
-	return x.Debug().Where("email = ?", strings.ToLower(email)).Find(&User{}).RowsAffected > 0
-	// x.Debug().Where(&User{Email: strings.ToLower(email)}).Find(&User{}).RowsAffected > 0
+func (u *User) HashPass() error {
+
+	password, err := bcrypt.GenerateFromPassword([]byte(u.Password), 0)
+	if err != nil {
+		return err
+
+	}
+	u.Password = string(password)
+	return nil
 }
 
 // ComparePass ..
 func (u *User) ComparePass(pwd string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pwd))
 	return err == nil
+}
+
+func (u *User) GetFullName() string {
+	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
 }
 
 func (u *User) GetEmail() string {
@@ -150,24 +138,3 @@ func (u *User) GetEmail() string {
 func (u *User) GetPhoneNumber() string {
 	return u.Phone
 }
-
-/** HOOKS Database **/
-// func (u *User) BeforeSave(scope *gorm.Scope) (err error) {
-
-// 	// Generate Password!
-// 	temporaryPass, _ := password.Generate(10, 4, 0, false, false)
-
-// 	scope.SetColumn("EncryptedPassword", temporaryPass) // TODO Deleted after test
-
-// 	// Send Message with password for user
-// 	if err := utils.Send(u.Email, temporaryPass); err != nil {
-// 		return err
-// 	}
-
-// 	// TODO Переделать, на hash и solt пароля
-// 	if password, err := bcrypt.GenerateFromPassword([]byte(temporaryPass), 0); err == nil {
-// 		scope.SetColumn("password", password)
-// 	}
-
-// 	return nil
-// }

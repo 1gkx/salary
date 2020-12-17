@@ -55,7 +55,18 @@ func errorhendler(w http.ResponseWriter, r *http.Request) {
 }
 
 func profile(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	responce(w, r, "profile", nil)
+	w.Header().Set("Cache-Control", "No-Cache")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	templates.Templates.ExecuteTemplate(w, "user",
+		map[string]interface{}{
+			"isNew":     false,
+			"isProfile": true,
+			"user":      session.GetUser(r),
+			"data":      session.GetUser(r),
+			"redirect":  "/user",
+		},
+	)
+	return
 }
 
 func responceJson(code int, w http.ResponseWriter, data map[string]interface{}) {

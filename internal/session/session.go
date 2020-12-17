@@ -54,9 +54,12 @@ func Get(r *http.Request) (*sessions.Session, error) {
 // GetUser ...
 func GetUser(r *http.Request) *store.User {
 	c, _ := S.Get(r, cookieName)
-	email, _ := c.Values["user"].(string)
+	id, ok := c.Values["userID"].(uint)
+	if !ok {
+		fmt.Println("Error: cannot get user")
+	}
 
-	if u, err := store.FindByEmail(email); err == nil {
+	if u := store.FindByID(id); u != nil {
 		return u
 	}
 	return nil
@@ -71,17 +74,6 @@ func IsAdmin(r *http.Request) bool {
 // func (c *sessions.Session) IsAuth() bool {
 // 	isAdmin, _ := c.Values["isAuth"].(bool)
 // 	return isAdmin
-// }
-
-// func Reset(r *http.Request, w http.ResponseWriter) {
-// 	vs := map[string]interface{}{
-// 		"sms_code":   nil,
-// 		"user":       nil,
-// 		"expired_at": nil,
-// 		"isAuth":     false,
-// 		"isVeryfy":   false,
-// 	}
-// 	Add(r, w, vs)
 // }
 
 func Delete(r *http.Request, w http.ResponseWriter) {
@@ -130,16 +122,10 @@ func Add(r *http.Request, w http.ResponseWriter, val map[string]interface{}) err
 
 // CheckAuth Проверка логина и пароля
 func CheckAuth(r *http.Request) bool {
-	var (
-		u   *store.User
-		err error
-	)
-	if u, err = store.FindByEmail(r.FormValue("email")); err != nil {
-		fmt.Printf("auth failed: %s\n", err.Error())
-		return false
+	if u, err := store.FindByEmail(r.FormValue("email")); err == nil {
+		return u.ComparePass(r.FormValue("password"))
 	}
-
-	return u.ComparePass(r.FormValue("password"))
+	return false
 }
 
 func CheckSms(r *http.Request) bool {

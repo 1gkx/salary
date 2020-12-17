@@ -45,6 +45,15 @@ var funcMap = template.FuncMap{
 	"copyrightYear": func() string {
 		return fmt.Sprintf("%d", time.Now().Year())
 	},
+	"fullName": func(id uint) string {
+		if id == 0 {
+			return "Новый пользователь"
+		}
+
+		u := store.FindByID(id)
+
+		return u.GetFullName()
+	},
 }
 
 func InitTemplate() {

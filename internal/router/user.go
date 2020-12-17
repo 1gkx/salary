@@ -4,18 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/1gkx/salary/internal/session"
 	"github.com/1gkx/salary/internal/store"
 	templates "github.com/1gkx/salary/internal/template"
 	"github.com/gorilla/mux"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func setUserRouters() {
 	// Users
 	r.Handle("/admin/users", authRequireHandlerWrap(userList)).Methods("GET")
-	r.Handle("/admin/users/new", authRequireHandlerWrap(userNew)).Methods("GET")
 	r.Handle("/admin/users/{id:[0-9]+}", authRequireHandlerWrap(userprofile)).Methods("GET")
 	r.Handle("/admin/users", authRequireHandlerWrap(userAdd)).Methods("POST")
 	r.Handle("/admin/users", authRequireHandlerWrap(userUpdate)).Methods("PUT")
@@ -23,13 +22,29 @@ func setUserRouters() {
 }
 
 func userprofile(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
 	vars := mux.Vars(r)
-	u := store.FindByID(vars["id"])
-	j := map[string]interface{}{
-		"user": session.GetUser(r),
-		"data": u,
+	id, _ := strconv.Atoi(vars["id"])
+	u := store.FindByID(uint(id))
+
+	isNew := false
+	if uint(id) == 0 {
+		isNew = true
 	}
-	templates.Templates.ExecuteTemplate(w, "view", j)
+
+	w.Header().Set("Cache-Control", "No-Cache")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	templates.Templates.ExecuteTemplate(w, "user",
+		map[string]interface{}{
+			"isNew":     isNew,
+			"isProfile": false,
+			"user":      session.GetUser(r),
+			"data":      u,
+			"redirect":  "/admin/users",
+		},
+	)
+	return
+
 }
 
 func userList(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -60,12 +75,15 @@ func userNew(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 func userAdd(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	u := new(store.User)
-	_ = json.NewDecoder(r.Body).Decode(&u)
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		RespAPI(http.StatusInternalServerError, w, err)
+		return
+	}
+
 	fmt.Printf("User: %+v\n", u)
 
 	if err := store.AddUser(u); err != nil {
-		w.WriteHeader(501)
-		json.NewEncoder(w).Encode(err.Error())
+		RespAPI(http.StatusInternalServerError, w, err)
 		return
 	}
 	w.WriteHeader(201)
@@ -76,54 +94,23 @@ func userUpdate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	tmpUser := new(store.User)
 	if err := json.NewDecoder(r.Body).Decode(&tmpUser); err != nil {
-		w.WriteHeader(501)
-		fmt.Printf("{\"status\": \"%s\"}", err.Error())
-		json.NewEncoder(w).Encode(
-			fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
-		)
+		RespAPI(http.StatusInternalServerError, w, err)
 		return
 	}
 
-	fmt.Printf("{\"status\": \"%+v\"}", tmpUser)
-
-	u, err := store.FindByEmail(tmpUser.Email)
-	if err != nil {
-		w.WriteHeader(501)
-		fmt.Printf("{\"status\": \"%s\"}", err.Error())
-		json.NewEncoder(w).Encode(
-			fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
-		)
+	u := store.FindByID(tmpUser.ID)
+	fmt.Println(u)
+	if u == nil {
+		RespAPI(http.StatusInternalServerError, w, "user not found")
 		return
 	}
 
-	if u.ComparePass(tmpUser.Password) {
-		if password, err := bcrypt.GenerateFromPassword([]byte(tmpUser.NewPassword), 0); err == nil {
-			u.Password = string(password)
-		}
-	} else {
-		w.WriteHeader(501)
-		fmt.Printf("{\"status\": \"Password not compare\"}")
-		json.NewEncoder(w).Encode(
-			fmt.Sprintf("{\"status\": \"Password not compare\"}"),
-		)
+	if err := store.UpdateUser(tmpUser); err != nil {
+		RespAPI(http.StatusInternalServerError, w, err)
 		return
 	}
 
-	fmt.Printf("{\"status\": \"%+v\"}", u)
-	if err := store.UpdateUser(u); err != nil {
-		w.WriteHeader(501)
-		fmt.Printf("{\"status\": \"%s\"}", err.Error())
-		json.NewEncoder(w).Encode(
-			fmt.Sprintf("{\"status\": \"%s\"}", err.Error()),
-		)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(
-		fmt.Sprintf("{\"status\": \"OK\"}"),
-	)
+	RespAPI(http.StatusOK, w, "OK")
 	return
 }
 
@@ -131,19 +118,23 @@ func userRemove(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	u := new(store.User)
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		w.WriteHeader(501)
-		json.NewEncoder(w).Encode(err)
+		RespAPI(http.StatusInternalServerError, w, err)
 		return
 	}
 
 	if err := store.DeleteUserByID(u.ID); err != nil {
-		w.WriteHeader(501)
-		json.NewEncoder(w).Encode("{ status: Fail }")
+		RespAPI(http.StatusInternalServerError, w, "Fail")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("{\"status\": \"OK\"}")
+	RespAPI(http.StatusOK, w, "OK")
 	return
+}
+
+func RespAPI(code int, w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(
+		fmt.Sprintf("{\"status\": \"%s\"}", data),
+	)
 }
