@@ -42,7 +42,10 @@ func approve(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	if err := json.NewDecoder(r.Body).Decode(&client); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"code":   501,
+			"status": err,
+		})
 		return
 	}
 

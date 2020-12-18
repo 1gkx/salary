@@ -198,31 +198,28 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     })
 
-    console.log(map)
+    // console.log(map)
     $.post(this.action, JSON.stringify(map))
       .done(responce => $().message(true, responce))
       .fail(error => $().message(false, error));
   });
 
-  // // btn_approved.forEach((btn) => {
-  //   btn.addEventListener('click', function (e) {
-  //     let $el = e.target.closest('.item');
-  //     let data = {
-  //       "ClientID": $el.dataset.clientid,
-  //       "DepositID": $el.dataset.depositid,
-  //       "PhoneNumber": $el.querySelector(".PhoneNumber").value
-  //     }
-  //     fetch('/approve', {
-  //       method: 'POST',
-  //       body: JSON.stringify(data)
-  //     }).then(async (r) => {
-  //       let response = await r.json()
-  //       showResponce(true, response.status)
-  //     }).catch((err) => {
-  //       showResponce(false, err)
-  //     })
-  //   });
-  // });
+  $('[data-event="approve"]').on('click', function (e) {
+      let $el = $(this).closest('.item');
+      let data = {
+        "ClientID": $($el).data('clientid'),
+        "DepositID": $($el).data('depositid'),
+        "PhoneNumber": $($el).find(".PhoneNumber").val()
+      },
+      self = this;
+      console.log(data);
+      $.post('/approve', JSON.stringify(data))
+      .done(responce => {
+        $().message(true, responce)
+        $($el).remove();
+      })
+      .fail(error => $().message(false, error));
+  });
 
   // Установка приложения
   var navListItems = $('div.setup-panel a'),

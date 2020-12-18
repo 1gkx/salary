@@ -15,8 +15,8 @@ import (
 // }
 type Client struct {
 	gorm.Model
-	ClientID      string `json:"ClientID";gorm:"not null;unique"`
-	DepositID     string `json:"DepositID";gorm:"not null;unique"`
+	ClientID      int    `json:"ClientID";gorm:"not null;unique"`
+	DepositID     int    `json:"DepositID";gorm:"not null;unique"`
 	FullName      string `json:"FullName";gorm:"not null;"`
 	Bill          string `json:"Bill";gorm:"not null;"`
 	OrgName       string `json:"OrgName";gorm:"not null;"`
